@@ -1,8 +1,6 @@
-package model;
+package model.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * A class that represents user's bank account in application.
@@ -11,18 +9,19 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@NoArgsConstructor
+@AllArgsConstructor
 public class Account {
 
     /**
      * Account id.
      */
+    @Setter(AccessLevel.NONE)
     private long id;
 
     /**
      * Bank where the user account is located
      */
-    private Bank bank;
+    private long bankId;
 
     /**
      * Account balance
@@ -32,5 +31,15 @@ public class Account {
     /**
      * Owner of account;
      */
-    private User user;
+    private long userId;
+
+    /**
+     * Constructor without arguments with default values for class variables
+     */
+    public Account() {
+        id = 0;
+        bankId = 0;
+        balance = 0.0;
+        userId = 0;
+    }
 }

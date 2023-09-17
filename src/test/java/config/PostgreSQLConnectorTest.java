@@ -2,7 +2,11 @@ package config;
 
 import org.junit.jupiter.api.*;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.sql.Connection;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Class for testing connection to PostgreSQL
@@ -10,32 +14,65 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  * @author Vadim Rataiko
  */
 public class PostgreSQLConnectorTest {
+
+    /**
+     * Database url
+     */
+    private String url = "jdbc:postgresql://127.0.0.1:5432/edu";
+
+    /**
+     * Database user
+     */
+    private String user = "postgres";
+
+    /**
+     * Database password
+     */
+    private String password = "password";
     /**
      * Instance of database connection class
      */
-    PostgreSQLConnector connector;
+    private PostgreSQLConnector connector;
 
     /**
-     * Creates instance of database connection class before every test
+     * System stream for error messages
      */
-    @BeforeEach
-    void setConnector() {
-        connector = new PostgreSQLConnector();
-    }
+    private PrintStream errorStream = System.err;
 
     /**
      * Tests database connection
      */
     @Test
-    void getConnectionTest() {
-        assertNotEquals(null, connector.getConnection());
+    public void getConnectionTest() {
+        connector = new PostgreSQLConnector(url, user, password);
+
+        Connection connection = connector.getConnection();
+        assertNotNull(connection);
+        assertEquals(connection, connector.getConnection());
+        connector.closeConnection();
     }
+
+    /**
+     * Tests error handling during connection
+     */
+    @Test
+    public void getExceptionDuringConnection() {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(outputStream));
+
+        connector = new PostgreSQLConnector(url, user, password + "1");
+        connector.getConnection();
+        assertEquals("SQL State: 28P01\n" +
+                "ВАЖНО: пользователь \"postgres\" не прошёл проверку подлинности (по паролю)", outputStream.toString());
+    }
+
 
     /**
      * Closes database connection
      */
     @AfterEach
-    void closeConnection() {
+    public void closeConnection() {
         connector.closeConnection();
+        System.setErr(errorStream);
     }
 }

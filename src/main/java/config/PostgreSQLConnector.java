@@ -12,23 +12,29 @@ import java.sql.SQLException;
  * @author Vadim Rataiko
  */
 public class PostgreSQLConnector implements IDatabaseConnector {
-    /**
-     * database url
-     */
-    private final String URL = "jdbc:postgresql://127.0.0.1:5432/edu";
 
     /**
-     * database user
+     * Database url
      */
-    private final String USER = "postgres";
+    private String url;
 
     /**
-     * database password
+     * Database user
      */
-    private final String PASSWORD = "password";
+    private String user;
+
+    /**
+     * Database password
+     */
+    private String password;
 
     private Connection connection;
 
+    public PostgreSQLConnector(String url, String user, String password) {
+        this.url = url;
+        this.user = user;
+        this.password = password;
+    }
     /**
      * Creates database connection, or returns existing connection
      *
@@ -37,14 +43,13 @@ public class PostgreSQLConnector implements IDatabaseConnector {
     @Override
     public Connection getConnection() {
         try {
-            if (connection != null && !connection.isClosed()) {
+            if (connection != null) {
                 return connection;
             }
 
-            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            connection = DriverManager.getConnection(url, user, password);
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
-            return null;
         }
 
         return connection;
@@ -55,7 +60,7 @@ public class PostgreSQLConnector implements IDatabaseConnector {
      */
     public void closeConnection() {
         try {
-            if (connection != null && !connection.isClosed()) {
+            if (connection != null) {
                 connection.close();
                 connection = null;
             }
