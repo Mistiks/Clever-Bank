@@ -15,4 +15,7 @@ public interface IDatabaseConnector {
      * @return connection with database
      */
     Connection getConnection();
+
+    /** Closes existing database connection */
+    void closeConnection();
 }

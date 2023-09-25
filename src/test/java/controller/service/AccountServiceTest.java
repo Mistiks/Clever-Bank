@@ -1,85 +1,93 @@
 package controller.service;
 
 import config.PostgreSQLConnector;
-import controller.service.AccountService;
+import config.api.IDatabaseConnector;
+import controller.service.api.IAccountService;
 import model.entity.Account;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Class for testing CRUD operations with accounts
- *
- * @author Vadim Rataiko
- */
+/** Class for testing CRUD operations with accounts */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AccountServiceTest {
 
-    /**
-     * Database url
-     */
+    /** Database url */
     private static String url = "jdbc:postgresql://127.0.0.1:5432/edu";
 
-    /**
-     * Database user
-     */
+    /** Database user */
     private static String user = "postgres";
 
-    /**
-     * Database password
-     */
+    /** Database password */
     private static String password = "password";
 
-    /**
-     * Instance of database connection class
-     */
-    private static PostgreSQLConnector connector;
+    /** Instance of database connection interface */
+    private static IDatabaseConnector connector;
 
-    /**
-     * Instance of the class implementing CRUD operations with accounts in the database
-     */
-    private static AccountService accountService;
+    /** Instance of the class implementing CRUD operations with accounts in the database */
+    private static IAccountService accountService;
 
-    /**
-     * Id that will be used in tests
-     */
-    private static final long TEST_ID = -5;
+    /** Id that will be used in tests */
+    private final long testId = -5;
 
-    /**
-     * Account balance that will be used in tests
-     */
-    private static final double TEST_BALANCE = 5.00;
+    /** Bank id that will be used in tests */
+    private final long testBankId = 1;
 
-    /**
-     * Value that will be used in updating account information test
-     */
-    private static final double TEST_BALANCE_UPDATE = 1.00;
+    /** User id that will be used in tests */
+    private final long testUserId = -1;
 
-    /**
-     * Creates instance of database connection class before every test
-     */
+    /** Account balance that will be used in tests */
+    private final double testBalance = 5.00;
+
+    /** Value that will be used in updating account information test */
+    private final double testBalanceUpdate = 2.00;
+
+    /** Creates instance of database connection and account service before tests */
     @BeforeAll
-    public static void setConnector() {
+    public static void setConnectorAndService() {
         connector = new PostgreSQLConnector(url, user, password);
-        accountService = new AccountService(connector.getConnection());
+        Connection connection = connector.getConnection();
+
+        try {
+            connection.setAutoCommit(false); // operations in this test have no effect on the database
+        } catch (SQLException e) {
+            System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+        }
+
+        accountService = new AccountService(connection);
     }
 
-    /**
-     * Tests creating a new account in the database
-     */
+    /** Closes database connection */
+    @AfterAll
+    public static void tearDown() {
+        try {
+            connector.getConnection().rollback();
+            connector.getConnection().setAutoCommit(true);
+            connector.closeConnection();
+        } catch (SQLException e) {
+            System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+        }
+
+        accountService = null;
+        connector = null;
+    }
+
+    /** Tests creating a new account in the database */
     @Test
+    @Order(1)
     public void addAccountTest() {
-        assertEquals(1, accountService.addAccount(TEST_ID, TEST_ID, TEST_BALANCE, TEST_ID));
+        assertEquals(1, accountService.addAccount(testId, testBankId, testBalance, testUserId));
     }
 
-    /**
-     * Tests receiving information about account from the database
-     */
+    /** Tests receiving information about account from the database */
     @Test
+    @Order(2)
     public void getAccountTest() {
-        Account expected = new Account(TEST_ID, TEST_ID, TEST_BALANCE, TEST_ID);
-        Account actual = accountService.getAccount(TEST_ID);
+        Account expected = new Account(testId, testBankId, testBalance, testUserId);
+        Account actual = accountService.getAccount(testId);
 
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getBankId(), actual.getBankId());
@@ -87,30 +95,20 @@ public class AccountServiceTest {
         assertEquals(expected.getBalance(), actual.getBalance());
     }
 
-    /**
-     * Tests updating information about account in the database
-     */
+    /** Tests updating information about account in the database */
     @Test
+    @Order(3)
     public void updateAccountTest() {
-        assertEquals(1, accountService.updateAccount(TEST_ID, TEST_ID, TEST_BALANCE + TEST_BALANCE_UPDATE, TEST_ID));
-
-        Account actual = accountService.getAccount(TEST_ID);
-        assertEquals(TEST_BALANCE + TEST_BALANCE_UPDATE, actual.getBalance());
+        assertEquals(1, accountService.updateAccount(new Account(testId, testBankId,
+                testBalance + testBalanceUpdate, testUserId)));
+        Account updated = accountService.getAccount(testId);
+        assertEquals(testBalance + testBalanceUpdate, updated.getBalance());
     }
 
-    /**
-     * Tests deleting account from the database
-     */
+    /** Tests deleting account from the database */
     @Test
+    @Order(4)
     public void deleteAccountTest() {
-        assertEquals(1, accountService.deleteAccount(TEST_ID));
-    }
-
-    /**
-     * Closes database connection
-     */
-    @AfterAll
-    static void closeConnection() {
-        connector.closeConnection();
+        assertEquals(1, accountService.deleteAccount(testId));
     }
 }

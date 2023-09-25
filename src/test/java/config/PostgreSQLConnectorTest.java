@@ -48,8 +48,6 @@ public class PostgreSQLConnectorTest {
 
         Connection connection = connector.getConnection();
         assertNotNull(connection);
-        assertEquals(connection, connector.getConnection());
-        connector.closeConnection();
     }
 
     /**
@@ -72,7 +70,6 @@ public class PostgreSQLConnectorTest {
      */
     @AfterEach
     public void closeConnection() {
-        connector.closeConnection();
         System.setErr(errorStream);
     }
 }

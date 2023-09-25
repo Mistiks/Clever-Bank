@@ -42,11 +42,11 @@ public class PostgreSQLConnector implements IDatabaseConnector {
      */
     @Override
     public Connection getConnection() {
-        try {
-            if (connection != null) {
-                return connection;
-            }
+        if (connection != null) {
+            return connection;
+        }
 
+        try {
             connection = DriverManager.getConnection(url, user, password);
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
@@ -55,17 +55,16 @@ public class PostgreSQLConnector implements IDatabaseConnector {
         return connection;
     }
 
-    /**
-     * Closes existing database connection
-     */
+    /** Closes existing database connection */
+    @Override
     public void closeConnection() {
         try {
-            if (connection != null) {
-                connection.close();
-                connection = null;
+                if (connection != null) {
+                    connection.close();
+                    connection = null;
+                }
+            } catch (SQLException e) {
+                System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
             }
-        } catch (SQLException e) {
-            System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
         }
-    }
 }

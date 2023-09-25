@@ -19,7 +19,7 @@ public class TransactionService implements ITransactionService {
     /**
      * A database connection
      */
-    private final Connection connection;
+    private Connection connection;
 
     /**
      * A query for inserting transaction
@@ -35,11 +35,9 @@ public class TransactionService implements ITransactionService {
      * A query for updating transaction in database based on id
      */
     private final String updateStatement = "UPDATE clever_bank.transaction SET amount = ?, sender_id = ?, " +
-            "receiver_id = ? WHERE id = ?";
+            "receiver_id = ?, time = ? WHERE id = ?";
 
-    /**
-     * A query for deleting transaction from database based on id
-     */
+    /** A query for deleting transaction from database based on id */
     private final String deleteStatement = "DELETE FROM clever_bank.transaction WHERE id = ?";
 
     /**
@@ -121,20 +119,22 @@ public class TransactionService implements ITransactionService {
      * @param amount transaction amount
      * @param senderId id of transaction sender. Zero in case of account replenishment
      * @param receiverId id of transaction receiver. Zero in case of money withdrawal
+     * @param time new time of transaction
      *
      * @return number of affected by query rows
      */
     @Override
-    public int updateTransaction(long id, double amount, long senderId, long receiverId) {
+    public int updateTransaction(long id, double amount, long senderId, long receiverId, LocalDateTime time) {
         int numberOfAffectedRows = 0;
         PreparedStatement statement;
 
         try {
-            statement = connection.prepareStatement(insertStatement);
+            statement = connection.prepareStatement(updateStatement);
             statement.setDouble(1, amount);
             statement.setLong(2, senderId);
             statement.setLong(3, receiverId);
-            statement.setLong(4, id);
+            statement.setObject(4, time);
+            statement.setLong(5, id);
 
             numberOfAffectedRows = statement.executeUpdate();
         } catch (SQLException e) {

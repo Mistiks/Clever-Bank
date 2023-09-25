@@ -27,4 +27,22 @@ public interface IAccountService {
      * @return instance of Account class with specified id
      */
     Account getAccount(long id);
+
+    /**
+     * Updates account`s info in the database
+     *
+     * @param updatedAccount Account object with updated values
+     *
+     * @return number of affected by query rows
+     */
+    int updateAccount(Account updatedAccount);
+
+    /**
+     * Deletes account from the database
+     *
+     * @param id account id.
+     *
+     * @return number of affected by query rows
+     */
+    int deleteAccount(long id);
 }

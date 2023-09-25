@@ -2,6 +2,8 @@ package controller.service.api;
 
 import model.entity.Transaction;
 
+import java.time.LocalDateTime;
+
 /**
  * An interface that can be used for CRUD operations with transactions in application
  */
@@ -35,10 +37,11 @@ public interface ITransactionService {
      * @param amount new amount
      * @param senderId new id of transaction sender
      * @param receiverId new id of transaction receiver
+     * @param time new time of transaction
      *
      * @return number of affected by query rows
      */
-    int updateTransaction(long id, double amount, long senderId, long receiverId);
+    int updateTransaction(long id, double amount, long senderId, long receiverId, LocalDateTime time);
 
     /**
      * Deletes transaction from the database

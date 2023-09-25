@@ -16,7 +16,7 @@ public class UserService implements IUserService {
     /**
      * A database connection
      */
-    private final Connection connection;
+    private Connection connection;
 
     /**
      * A query for inserting user
@@ -94,7 +94,7 @@ public class UserService implements IUserService {
             resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                user = new User(resultSet.getInt("id"), resultSet.getString("name"));
+                user = new User(resultSet.getLong("id"), resultSet.getString("name"));
             }
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
