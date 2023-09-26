@@ -4,11 +4,9 @@ import config.PostgreSQLConnector;
 import config.api.IDatabaseConnector;
 import model.entity.Transaction;
 import org.junit.jupiter.api.*;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 

@@ -1,14 +1,11 @@
 package controller.service;
 
 import config.PostgreSQLConnector;
-
 import config.api.IDatabaseConnector;
 import model.entity.User;
 import org.junit.jupiter.api.*;
-
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 /** A class for testing CRUD operations with users */

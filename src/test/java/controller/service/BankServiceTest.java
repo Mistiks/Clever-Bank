@@ -4,10 +4,8 @@ import config.PostgreSQLConnector;
 import config.api.IDatabaseConnector;
 import model.entity.Bank;
 import org.junit.jupiter.api.*;
-
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /** Class for testing CRUD operations with banks */

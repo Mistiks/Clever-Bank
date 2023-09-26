@@ -2,9 +2,7 @@ package controller.service.api;
 
 import model.entity.Account;
 
-/**
- * An interface that can be used for CRUD operations with accounts in application
- */
+/** An interface that can be used for CRUD operations with accounts in application */
 public interface IAccountService {
 
     /**

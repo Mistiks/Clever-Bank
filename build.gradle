@@ -23,9 +23,8 @@ repositories {
 
 dependencies {
     implementation 'org.postgresql:postgresql:42.6.0'
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '2.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
-    testImplementation 'org.mockito:mockito-inline:5.2.0'
-    testImplementation 'org.mockito:mockito-junit-jupiter:5.2.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 }
 

@@ -5,10 +5,8 @@ import config.api.IDatabaseConnector;
 import controller.service.api.IAccountService;
 import model.entity.Account;
 import org.junit.jupiter.api.*;
-
 import java.sql.Connection;
 import java.sql.SQLException;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /** Class for testing CRUD operations with accounts */
