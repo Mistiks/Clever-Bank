@@ -6,9 +6,11 @@ import controller.service.TransactionService;
 import controller.service.api.IAccountService;
 import controller.service.api.ITransactionService;
 import model.entity.Account;
+import utils.YmlFileReader;
 import view.ApplicationView;
 
 import java.sql.SQLException;
+import java.util.Scanner;
 
 /** Class that controls the work of the application depending on user input */
 public class ApplicationController {
@@ -25,32 +27,43 @@ public class ApplicationController {
     /** Instance of ITransactionService interface for operations with transactions */
     private final ITransactionService transactionService;
 
+    /** Scanner object for reading input from console */
+    private final Scanner scanner;
+
     /**
      * Constructor with parameter for controller creation
      *
      * @param connector implementation of database connection interface
      */
-    public ApplicationController(IDatabaseConnector connector) {
+    public ApplicationController(IDatabaseConnector connector, Scanner scanner) {
         this.connector = connector;
-        accountService = new AccountService(this.connector.getConnection());
+        this.scanner = scanner;
+        accountService = new AccountService(this.connector.getConnection(), new YmlFileReader());
         transactionService = new TransactionService(this.connector.getConnection());
     }
 
-    /** Starts the service based on user input */
+    /**
+     * Starts the service based on user input.
+     * Checks in the second thread whether interest should be accrued to Clever-Bank users
+     */
     public void start() {
-        int option = view.chooseOperation();
+        int option;
+        Thread interestCheck = new Thread(accountService);
+        interestCheck.start();
+
+        option = view.chooseOperation(scanner);
 
         while (option != 4) {
             switch (option) {
                 case 1 -> replenishAccount();
                 case 2 -> withdrawAccount();
                 case 3 -> transferToAnotherAccount();
-
-                default -> System.out.println("Wrong input. Try again.");
             }
 
-            option = view.chooseOperation();
+            option = view.chooseOperation(scanner);
         }
+
+        interestCheck.interrupt();
     }
 
     /** Replenishes user account and creates transaction record in database. Print messages in case of errors */
@@ -59,24 +72,24 @@ public class ApplicationController {
         long id;
         double amount;
 
-        id = view.getIdForReplenishmentFromUser();
-        amount = view.getAmountForReplenishmentFromUser();
+        id = view.getIdForReplenishmentFromUser(scanner);
+        amount = view.getAmountForReplenishmentFromUser(scanner);
         account = accountService.getAccount(id);
 
         if (account.getId() == 0) {
-            System.out.println("Account with entered id doesn't exist");
+            System.out.println("\nAccount with entered id doesn't exist\n");
             return;
         }
 
         account.setBalance(account.getBalance() + amount);
 
         if (accountService.updateAccount(account) != 1) {
-            System.out.println("An error occurred while replenishing your account");
+            System.out.println("\nAn error occurred while replenishing your account\n");
             return;
         }
 
         if (transactionService.addTransaction(1, amount, 0, id) != 1) {
-            System.out.println("An error occurred while saving transaction information");
+            System.out.println("\nAn error occurred while saving transaction information\n");
 
             account.setBalance(account.getBalance() - amount); // rollback balance update
             accountService.updateAccount(account);
@@ -84,7 +97,7 @@ public class ApplicationController {
             return;
         }
 
-        System.out.println("Operation completed successfully");
+        System.out.println("Operation completed successfully\n");
     }
 
     /** Withdraws money from account and creates transaction record in database. Print messages in case of errors */
@@ -93,29 +106,32 @@ public class ApplicationController {
         long id;
         double amount;
 
-        id = view.getIdForWithdrawalFromUser();
-        amount = view.getAmountForWithdrawalFromUser();
+        id = view.getIdForWithdrawalFromUser(scanner);
+        amount = view.getAmountForWithdrawalFromUser(scanner);
         account = accountService.getAccount(id);
 
         if (account.getId() == 0) {
-            System.out.println("Account with entered id doesn't exist");
+            System.out.println("\nAccount with entered id doesn't exist\n");
+
             return;
         }
 
         if (account.getBalance() < amount) {
-            System.out.println("There are not enough money on account balance");
+            System.out.println("\nThere are not enough money on account balance\n");
+
             return;
         }
 
         account.setBalance(account.getBalance() - amount);
 
         if (accountService.updateAccount(account) != 1) {
-            System.out.println("An error occurred during cash withdrawal");
+            System.out.println("\nAn error occurred during cash withdrawal\n");
+
             return;
         }
 
         if (transactionService.addTransaction(1, amount, 0, id) != 1) {
-            System.out.println("An error occurred while saving transaction information");
+            System.out.println("\nAn error occurred while saving transaction information\n");
 
             account.setBalance(account.getBalance() + amount); // rollback balance update
             accountService.updateAccount(account);
@@ -123,7 +139,7 @@ public class ApplicationController {
             return;
         }
 
-        System.out.println("Operation completed successfully");
+        System.out.println("Operation completed successfully\n");
     }
 
     /**
@@ -137,24 +153,27 @@ public class ApplicationController {
         long receiverId;
         double amount;
 
-        senderId = view.getSenderId();
-        receiverId = view.getReceiverId();
-        amount = view.getAmountForTransfer();
+        senderId = view.getSenderId(scanner);
+        receiverId = view.getReceiverId(scanner);
+        amount = view.getAmountForTransfer(scanner);
         receiver = accountService.getAccount(receiverId);
         sender = accountService.getAccount(senderId);
 
         if (receiver.getId() == 0) {
-            System.out.println("Receiver account with entered id doesn't exist");
+            System.out.println("\nReceiver account with entered id doesn't exist\n");
+
             return;
         }
 
         if (sender.getId() == 0) {
-            System.out.println("Sender account with entered id doesn't exist");
+            System.out.println("\nSender account with entered id doesn't exist\n");
+
             return;
         }
 
         if (sender.getBalance() < amount) {
-            System.out.println("There are not enough money on account balance");
+            System.out.println("\nThere are not enough money on account balance\n");
+
             return;
         }
 
@@ -167,9 +186,11 @@ public class ApplicationController {
             accountService.updateAccount(receiver);
 
             if (transactionService.addTransaction(1, amount, senderId, receiverId) != 1) {
-                System.out.println("An error occurred while saving transaction information");
+                System.out.println("\nAn error occurred while saving transaction information\n");
+
                 connector.getConnection().rollback();
                 connector.getConnection().setAutoCommit(true);
+
                 return;
             }
 
@@ -177,7 +198,7 @@ public class ApplicationController {
             connector.getConnection().setAutoCommit(true);
         } catch (SQLException e) {
             try {
-                System.out.println("Transfer failed due to an error");
+                System.out.println("\nTransfer failed due to an error\n");
 
                 connector.getConnection().rollback();
                 connector.getConnection().setAutoCommit(true);

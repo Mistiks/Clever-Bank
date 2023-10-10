@@ -36,11 +36,12 @@ public class ApplicationView {
     /**
      * Prints menu and reads user input
      *
+     * @param scanner Scanner object for reading input from console
+     *
      * @return number entered by user from keyboard
      */
-    public int chooseOperation() {
+    public int chooseOperation(Scanner scanner) {
         int option = 0;
-        Scanner scanner = new Scanner(System.in);
 
         printMainMenu();
 
@@ -52,8 +53,6 @@ public class ApplicationView {
                 System.out.print(chooseOption);
             }
         }
-
-        scanner.close();
 
         return option;
     }
@@ -70,76 +69,91 @@ public class ApplicationView {
     /**
      * Retrieves entered account id from console
      *
+     * @param scanner Scanner object for reading input from console
+     *
      * @return id entered by user
      */
-    public long getIdForReplenishmentFromUser() {
-        return getLong(replenishmentAccount);
+    public long getIdForReplenishmentFromUser(Scanner scanner) {
+        return getLong(replenishmentAccount, scanner);
     }
 
     /**
      * Retrieves entered account id from console for money withdrawal
      *
+     * @param scanner Scanner object for reading input from console
+     *
      * @return id entered by user
      */
-    public long getIdForWithdrawalFromUser() {
-        return getLong(withdrawalAccount);
+    public long getIdForWithdrawalFromUser(Scanner scanner) {
+        return getLong(withdrawalAccount, scanner);
     }
 
     /**
      * Retrieves entered sender account id from console for money transfer
      *
+     * @param scanner Scanner object for reading input from console
+     *
      * @return id entered by user
      */
-    public long getSenderId() {
-        return getLong(senderAccount);
+    public long getSenderId(Scanner scanner) {
+        return getLong(senderAccount, scanner);
     }
 
     /**
      * Retrieves entered receiver account id from console for money transfer
      *
+     * @param scanner Scanner object for reading input from console
+     *
      * @return id entered by user
      */
-    public long getReceiverId() {
-        return getLong(receiverAccount);
+    public long getReceiverId(Scanner scanner) {
+        return getLong(receiverAccount, scanner);
     }
 
     /**
      * Retrieves entered money amount from console
      *
+     * @param scanner Scanner object for reading input from console
+     *
      * @return amount entered by user
      */
-    public double getAmountForReplenishmentFromUser() {
-        return getDouble(replenishmentAmount);
+    public double getAmountForReplenishmentFromUser(Scanner scanner) {
+        return getDouble(replenishmentAmount, scanner);
     }
 
     /**
      * Retrieves entered money amount for transfer from console
      *
+     * @param scanner Scanner object for reading input from console
+     *
      * @return amount entered by user
      */
-    public double getAmountForTransfer() {
-        return getDouble(transferAmount);
+    public double getAmountForTransfer(Scanner scanner) {
+        return getDouble(transferAmount, scanner);
     }
 
     /**
      * Retrieves entered money amount from console for money withdrawal
      *
+     * @param scanner Scanner object for reading input from console
+     *
      * @return amount entered by user
      */
-    public double getAmountForWithdrawalFromUser() {
-        return getDouble(withdrawalAmount);
+    public double getAmountForWithdrawalFromUser(Scanner scanner) {
+        return getDouble(withdrawalAmount, scanner);
     }
 
     /**
      * Retrieves entered long value from console
      *
      * @param message string that will be shown to the user
+     * @param scanner Scanner object for reading input from console
+     *
      * @return value entered by user
      */
-    public long getLong(String message) {
+    public long getLong(String message, Scanner scanner) {
         long id = 0;
         boolean correctInput = false;
-        Scanner scanner = new Scanner(System.in);
 
         System.out.print(message);
 
@@ -154,8 +168,6 @@ public class ApplicationView {
             }
         }
 
-        scanner.close();
-
         return id;
     }
 
@@ -163,12 +175,13 @@ public class ApplicationView {
      * Retrieves entered double value from console
      *
      * @param message string that will be shown to the user
+     * @param scanner Scanner object for reading input from console
+     *
      * @return value entered by user
      */
-    public double getDouble(String message) {
+    public double getDouble(String message, Scanner scanner) {
         double id = 0.0;
         boolean correctInput = false;
-        Scanner scanner = new Scanner(System.in);
 
         System.out.print(message);
 
@@ -182,8 +195,6 @@ public class ApplicationView {
                 System.out.print(message);
             }
         }
-
-        scanner.close();
 
         return id;
     }

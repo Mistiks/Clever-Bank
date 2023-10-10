@@ -5,9 +5,12 @@ import config.api.IDatabaseConnector;
 import controller.service.api.IAccountService;
 import model.entity.Account;
 import org.junit.jupiter.api.*;
+import utils.YmlFileReader;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /** Class for testing CRUD operations with accounts */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -55,7 +58,7 @@ public class AccountServiceTest {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
         }
 
-        accountService = new AccountService(connection);
+        accountService = new AccountService(connection, new YmlFileReader());
     }
 
     /** Closes database connection */
@@ -103,10 +106,24 @@ public class AccountServiceTest {
         assertEquals(testBalance + testBalanceUpdate, updated.getBalance());
     }
 
-    /** Tests deleting account from the database */
+    /** Tests updating information about account balance of specific bank in the database */
     @Test
     @Order(4)
+    public void updateAllBankAccountsBalanceTest() {
+        accountService.updateAccount(new Account(testId, testBankId, testBalance, testUserId));
+        accountService.updateAllBankAccountsBalance("Clever-Bank");
+
+        Account updated = accountService.getAccount(testId);
+        assertNotEquals(testBalance, updated.getBalance());
+    }
+
+    /** Tests deleting account from the database */
+    @Test
+    @Order(5)
     public void deleteAccountTest() {
         assertEquals(1, accountService.deleteAccount(testId));
+        Account actual = accountService.getAccount(testId);
+
+        assertEquals(0, actual.getId());
     }
 }

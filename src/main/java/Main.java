@@ -2,14 +2,10 @@ import config.PostgreSQLConnector;
 import config.api.IDatabaseConnector;
 import controller.ApplicationController;
 
-/**
- * A class that represents application entry point functionality.
- *
- * @author Vadim Rataiko
- */
+import java.util.Scanner;
+
+/** A class that represents application entry point functionality */
 public class Main {
-
-
 
     /**
      * Application entry point. Provides an interface for interaction between the user and the program.
@@ -17,9 +13,12 @@ public class Main {
      * @param args The command line arguments.
      */
     public static void main(String[] args) {
-        IDatabaseConnector connector = new PostgreSQLConnector("jdbc:postgresql://127.0.0.1:5432/edu", "postgres",
-                "password");
-        ApplicationController controller = new ApplicationController(connector);
+        Scanner scanner = new Scanner(System.in);
+        IDatabaseConnector connector = new PostgreSQLConnector("jdbc:postgresql://127.0.0.1:5432/edu",
+                "postgres", "password");
+        ApplicationController controller = new ApplicationController(connector, scanner);
+
         controller.start();
+        scanner.close();
     }
 }

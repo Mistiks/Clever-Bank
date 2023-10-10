@@ -3,7 +3,7 @@ package controller.service.api;
 import model.entity.Account;
 
 /** An interface that can be used for CRUD operations with accounts in application */
-public interface IAccountService {
+public interface IAccountService extends Runnable {
 
     /**
      * Adds a new account to the database
@@ -34,6 +34,15 @@ public interface IAccountService {
      * @return number of affected by query rows
      */
     int updateAccount(Account updatedAccount);
+
+    /**
+     * Updates balance of all accounts of selected bank.
+     *
+     * @param bankName name of bank which accounts will be updated
+     *
+     * @return number of affected by query rows
+     */
+    int updateAllBankAccountsBalance(String bankName);
 
     /**
      * Deletes account from the database
