@@ -17,9 +17,9 @@ public interface ITransactionService {
      * @param senderId id of transaction sender
      * @param receiverId id of transaction receiver
      *
-     * @return number of affected by query rows
+     * @return id of created transaction
      */
-    int addTransaction(long id, double amount, long senderId, long receiverId);
+    long addTransaction(long id, double amount, long senderId, long receiverId);
 
     /**
      * Reads transaction with specified id from database

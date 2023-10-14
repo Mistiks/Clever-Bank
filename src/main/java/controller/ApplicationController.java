@@ -2,12 +2,16 @@ package controller;
 
 import config.api.IDatabaseConnector;
 import controller.service.AccountService;
+import controller.service.BankService;
 import controller.service.TransactionService;
 import controller.service.api.IAccountService;
+import controller.service.api.IBankService;
 import controller.service.api.ITransactionService;
 import model.entity.Account;
+import model.entity.Transaction;
 import utils.YmlFileReader;
 import view.ApplicationView;
+import view.CheckView;
 
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -27,8 +31,14 @@ public class ApplicationController {
     /** Instance of ITransactionService interface for operations with transactions */
     private final ITransactionService transactionService;
 
+    /** Instance of IBankService interface for operations with banks */
+    private final IBankService bankService;
+
     /** Scanner object for reading input from console */
     private final Scanner scanner;
+
+    /** Instance of CheckView object for creating checks after transactions */
+    private final CheckView checkView;
 
     /**
      * Constructor with parameter for controller creation
@@ -40,6 +50,8 @@ public class ApplicationController {
         this.scanner = scanner;
         accountService = new AccountService(this.connector.getConnection(), new YmlFileReader());
         transactionService = new TransactionService(this.connector.getConnection());
+        bankService = new BankService(this.connector.getConnection());
+        this.checkView = new CheckView(bankService);
     }
 
     /**
@@ -69,8 +81,10 @@ public class ApplicationController {
     /** Replenishes user account and creates transaction record in database. Print messages in case of errors */
     private void replenishAccount() {
         Account account;
+        Transaction transaction;
         long id;
         double amount;
+        long transactionId;
 
         id = view.getIdForReplenishmentFromUser(scanner);
         amount = view.getAmountForReplenishmentFromUser(scanner);
@@ -88,7 +102,9 @@ public class ApplicationController {
             return;
         }
 
-        if (transactionService.addTransaction(1, amount, 0, id) != 1) {
+        transactionId = transactionService.addTransaction(1, amount, 0, id);
+
+        if (transactionId == 0) {
             System.out.println("\nAn error occurred while saving transaction information\n");
 
             account.setBalance(account.getBalance() - amount); // rollback balance update
@@ -97,13 +113,19 @@ public class ApplicationController {
             return;
         }
 
-        System.out.println("Operation completed successfully\n");
+        transaction = transactionService.getTransaction(transactionId);
+
+        System.out.println(checkView.getCheck(transaction.getId(), transaction.getTime().toLocalDate(),
+                transaction.getTime().toLocalTime(), 0, account.getBankId(),
+                0, transaction.getReceiver(), transaction.getAmount()));
     }
 
     /** Withdraws money from account and creates transaction record in database. Print messages in case of errors */
     private void withdrawAccount() {
         Account account;
+        Transaction transaction;
         long id;
+        long transactionId;
         double amount;
 
         id = view.getIdForWithdrawalFromUser(scanner);
@@ -130,7 +152,9 @@ public class ApplicationController {
             return;
         }
 
-        if (transactionService.addTransaction(1, amount, 0, id) != 1) {
+        transactionId = transactionService.addTransaction(1, amount, id, 0);
+
+        if (transactionId == 0) {
             System.out.println("\nAn error occurred while saving transaction information\n");
 
             account.setBalance(account.getBalance() + amount); // rollback balance update
@@ -139,7 +163,11 @@ public class ApplicationController {
             return;
         }
 
-        System.out.println("Operation completed successfully\n");
+        transaction = transactionService.getTransaction(transactionId);
+
+        System.out.println(checkView.getCheck(transaction.getId(), transaction.getTime().toLocalDate(),
+                transaction.getTime().toLocalTime(), account.getBankId(), 0,
+                transaction.getSender(), 0, transaction.getAmount()));
     }
 
     /**
@@ -149,8 +177,10 @@ public class ApplicationController {
     private void transferToAnotherAccount() {
         Account receiver;
         Account sender;
+        Transaction transaction;
         long senderId;
         long receiverId;
+        long transactionId;
         double amount;
 
         senderId = view.getSenderId(scanner);
@@ -185,7 +215,9 @@ public class ApplicationController {
             accountService.updateAccount(sender);
             accountService.updateAccount(receiver);
 
-            if (transactionService.addTransaction(1, amount, senderId, receiverId) != 1) {
+            transactionId = transactionService.addTransaction(1, amount, senderId, receiverId);
+
+            if (transactionId == 0) {
                 System.out.println("\nAn error occurred while saving transaction information\n");
 
                 connector.getConnection().rollback();
@@ -196,6 +228,12 @@ public class ApplicationController {
 
             connector.getConnection().commit();
             connector.getConnection().setAutoCommit(true);
+
+            transaction = transactionService.getTransaction(transactionId);
+
+            System.out.println(checkView.getCheck(transaction.getId(), transaction.getTime().toLocalDate(),
+                    transaction.getTime().toLocalTime(), sender.getBankId(), receiver.getBankId(),
+                    transaction.getSender(), transaction.getReceiver(), transaction.getAmount()));
         } catch (SQLException e) {
             try {
                 System.out.println("\nTransfer failed due to an error\n");

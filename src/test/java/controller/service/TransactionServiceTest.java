@@ -78,7 +78,7 @@ public class TransactionServiceTest {
     @Test
     @Order(1)
     public void addTransactionTest() {
-        assertEquals(1, transactionService.addTransaction(TEST_ID, TEST_AMOUNT, TEST_ID, TEST_ID * 2));
+        assertEquals(TEST_ID, transactionService.addTransaction(TEST_ID, TEST_AMOUNT, TEST_ID, TEST_ID * 2));
     }
 
     /** Tests receiving information about transaction from the database. Not checking time of transaction */
