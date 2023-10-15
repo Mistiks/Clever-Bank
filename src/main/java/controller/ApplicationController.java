@@ -9,6 +9,7 @@ import controller.service.api.IBankService;
 import controller.service.api.ITransactionService;
 import model.entity.Account;
 import model.entity.Transaction;
+import utils.CheckFileWriter;
 import utils.YmlFileReader;
 import view.ApplicationView;
 import view.CheckView;
@@ -40,6 +41,9 @@ public class ApplicationController {
     /** Instance of CheckView object for creating checks after transactions */
     private final CheckView checkView;
 
+    /** Instance of CheckFileWriter for saving check to file */
+    private final CheckFileWriter checkFileWriter;
+
     /**
      * Constructor with parameter for controller creation
      *
@@ -52,6 +56,7 @@ public class ApplicationController {
         transactionService = new TransactionService(this.connector.getConnection());
         bankService = new BankService(this.connector.getConnection());
         this.checkView = new CheckView(bankService);
+        this.checkFileWriter = new CheckFileWriter();
     }
 
     /**
@@ -82,6 +87,7 @@ public class ApplicationController {
     private void replenishAccount() {
         Account account;
         Transaction transaction;
+        String check;
         long id;
         double amount;
         long transactionId;
@@ -114,16 +120,19 @@ public class ApplicationController {
         }
 
         transaction = transactionService.getTransaction(transactionId);
-
-        System.out.println(checkView.getCheck(transaction.getId(), transaction.getTime().toLocalDate(),
+        check = checkView.getCheck(transaction.getId(), transaction.getTime().toLocalDate(),
                 transaction.getTime().toLocalTime(), 0, account.getBankId(),
-                0, transaction.getReceiver(), transaction.getAmount()));
+                0, transaction.getReceiver(), transaction.getAmount());
+
+        checkFileWriter.saveCheck(check, transaction);
+        System.out.println(check);
     }
 
     /** Withdraws money from account and creates transaction record in database. Print messages in case of errors */
     private void withdrawAccount() {
         Account account;
         Transaction transaction;
+        String check;
         long id;
         long transactionId;
         double amount;
@@ -164,10 +173,12 @@ public class ApplicationController {
         }
 
         transaction = transactionService.getTransaction(transactionId);
-
-        System.out.println(checkView.getCheck(transaction.getId(), transaction.getTime().toLocalDate(),
+        check = checkView.getCheck(transaction.getId(), transaction.getTime().toLocalDate(),
                 transaction.getTime().toLocalTime(), account.getBankId(), 0,
-                transaction.getSender(), 0, transaction.getAmount()));
+                transaction.getSender(), 0, transaction.getAmount());
+
+        checkFileWriter.saveCheck(check, transaction);
+        System.out.println(check);
     }
 
     /**
@@ -178,6 +189,7 @@ public class ApplicationController {
         Account receiver;
         Account sender;
         Transaction transaction;
+        String check;
         long senderId;
         long receiverId;
         long transactionId;
@@ -230,10 +242,12 @@ public class ApplicationController {
             connector.getConnection().setAutoCommit(true);
 
             transaction = transactionService.getTransaction(transactionId);
-
-            System.out.println(checkView.getCheck(transaction.getId(), transaction.getTime().toLocalDate(),
+            check = checkView.getCheck(transaction.getId(), transaction.getTime().toLocalDate(),
                     transaction.getTime().toLocalTime(), sender.getBankId(), receiver.getBankId(),
-                    transaction.getSender(), transaction.getReceiver(), transaction.getAmount()));
+                    transaction.getSender(), transaction.getReceiver(), transaction.getAmount());
+
+            checkFileWriter.saveCheck(check, transaction);
+            System.out.println(check);
         } catch (SQLException e) {
             try {
                 System.out.println("\nTransfer failed due to an error\n");
