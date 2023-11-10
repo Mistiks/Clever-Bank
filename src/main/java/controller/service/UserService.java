@@ -16,7 +16,7 @@ public class UserService implements IUserService {
     /**
      * A database connection
      */
-    private Connection connection;
+    private final Connection connection;
 
     /**
      * A query for inserting user
@@ -66,7 +66,9 @@ public class UserService implements IUserService {
             statement.setLong(1, id <= 0 ? id : Long.parseLong("DEFAULT"));
             statement.setString(2, name);
 
-            amountOfAffectedRows = statement.executeUpdate();
+            synchronized (connection) {
+                amountOfAffectedRows = statement.executeUpdate();
+            }
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
         }
@@ -91,7 +93,10 @@ public class UserService implements IUserService {
         try {
             statement = connection.prepareStatement(readStatement);
             statement.setLong(1, id);
-            resultSet = statement.executeQuery();
+
+            synchronized (connection) {
+                resultSet = statement.executeQuery();
+            }
 
             while (resultSet.next()) {
                 user = new User(resultSet.getLong("id"), resultSet.getString("name"));
@@ -121,7 +126,9 @@ public class UserService implements IUserService {
             statement.setString(1, name);
             statement.setLong(2, id);
 
-            numberOfAffectedRows = statement.executeUpdate();
+            synchronized (connection) {
+                numberOfAffectedRows = statement.executeUpdate();
+            }
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
         }
@@ -145,7 +152,9 @@ public class UserService implements IUserService {
             statement = connection.prepareStatement(deleteStatement);
             statement.setLong(1, id);
 
-            numberOfAffectedRows = statement.executeUpdate();
+            synchronized (connection) {
+                numberOfAffectedRows = statement.executeUpdate();
+            }
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
         }

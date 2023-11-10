@@ -1,7 +1,6 @@
 import config.PostgreSQLConnector;
 import config.api.IDatabaseConnector;
 import controller.ApplicationController;
-import view.CheckView;
 
 import java.util.Scanner;
 
@@ -20,6 +19,5 @@ public class Main {
         ApplicationController controller = new ApplicationController(connector, scanner);
 
         controller.start();
-        scanner.close();
     }
 }

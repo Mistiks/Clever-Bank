@@ -6,8 +6,8 @@ import java.util.Scanner;
 public class ApplicationView {
 
     /** Array of main menu options */
-    private final String[] mainMenu = {"1 – account replenishment", "2 – money withdrawal",
-            "3 – transfer to another account", "4 – exit"};
+    private final String[] mainMenu = {"1 - account replenishment", "2 - money withdrawal",
+            "3 - transfer to another account", "4 - exit"};
 
     /** String with message after main menu options */
     private final String chooseOption = "Choose option: ";

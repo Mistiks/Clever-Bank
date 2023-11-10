@@ -15,7 +15,7 @@ import java.time.LocalTime;
 public class AccountService implements IAccountService {
 
     /** A database connection */
-    private Connection connection;
+    private final Connection connection;
 
     /** Interface for reading values from a YML file*/
     private IYmlFileReader fileReader;
@@ -83,7 +83,9 @@ public class AccountService implements IAccountService {
                 statement.setLong(3, userId);
             }
 
-            numberOfAffectedRows = statement.executeUpdate();
+            synchronized (connection) {
+                numberOfAffectedRows = statement.executeUpdate();
+            }
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
         }
@@ -108,7 +110,10 @@ public class AccountService implements IAccountService {
         try {
             statement = connection.prepareStatement(readStatement);
             statement.setLong(1, id);
-            resultSet = statement.executeQuery();
+
+            synchronized (connection) {
+                resultSet = statement.executeQuery();
+            }
 
             while (resultSet.next()) {
                 account = new Account(resultSet.getLong("id"), resultSet.getLong("bank_id"),
@@ -140,10 +145,12 @@ public class AccountService implements IAccountService {
             statement.setLong(3, updatedAccount.getUserId());
             statement.setLong(4, updatedAccount.getId());
 
-            numberOfAffectedRows = statement.executeUpdate();
-        } catch (SQLException e) {
-            System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
-        }
+            synchronized (connection) {
+                numberOfAffectedRows = statement.executeUpdate();
+            }
+            } catch (SQLException e) {
+                System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+            }
 
         return numberOfAffectedRows;
     }
@@ -167,7 +174,9 @@ public class AccountService implements IAccountService {
             statement.setDouble(1, percent);
             statement.setString(2, bankName);
 
-            numberOfAffectedRows = statement.executeUpdate();
+            synchronized (connection) {
+                numberOfAffectedRows = statement.executeUpdate();
+            }
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
         }
@@ -191,7 +200,9 @@ public class AccountService implements IAccountService {
             statement = connection.prepareStatement(deleteStatement);
             statement.setLong(1, id);
 
-            numberOfAffectedRows = statement.executeUpdate();
+            synchronized (connection) {
+                numberOfAffectedRows = statement.executeUpdate();
+            }
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
         }

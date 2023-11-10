@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class TransactionService implements ITransactionService {
 
     /** A database connection */
-    private Connection connection;
+    private final Connection connection;
 
     /** A query for inserting transaction */
     private final String insertStatement = "INSERT INTO clever_bank.transaction VALUES (?, ?, ?, ?, ?) RETURNING id";
@@ -74,7 +74,9 @@ public class TransactionService implements ITransactionService {
                 statement.setLong(4, receiverId);
             }
 
-            resultSet = statement.executeQuery();
+            synchronized (connection) {
+                resultSet = statement.executeQuery();
+            }
 
             while (resultSet.next()) {
                 transactionId = resultSet.getLong("id");
@@ -103,7 +105,10 @@ public class TransactionService implements ITransactionService {
         try {
             statement = connection.prepareStatement(readStatement);
             statement.setLong(1, id);
-            resultSet = statement.executeQuery();
+
+            synchronized (connection) {
+                resultSet = statement.executeQuery();
+            }
 
             while (resultSet.next()) {
                 transaction = new Transaction(resultSet.getLong("id"), resultSet.getDouble("amount"),
@@ -141,7 +146,9 @@ public class TransactionService implements ITransactionService {
             statement.setObject(4, time);
             statement.setLong(5, id);
 
-            numberOfAffectedRows = statement.executeUpdate();
+            synchronized (connection) {
+                numberOfAffectedRows = statement.executeUpdate();
+            }
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
         }
@@ -165,7 +172,9 @@ public class TransactionService implements ITransactionService {
             statement = connection.prepareStatement(deleteStatement);
             statement.setLong(1, id);
 
-            numberOfAffectedRows = statement.executeUpdate();
+            synchronized (connection) {
+                numberOfAffectedRows = statement.executeUpdate();
+            }
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
         }

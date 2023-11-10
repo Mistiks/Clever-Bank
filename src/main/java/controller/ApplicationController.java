@@ -81,6 +81,7 @@ public class ApplicationController {
         }
 
         interestCheck.interrupt();
+        scanner.close();
     }
 
     /** Replenishes user account and creates transaction record in database. Print messages in case of errors */
@@ -220,26 +221,28 @@ public class ApplicationController {
         }
 
         try {
-            connector.getConnection().setAutoCommit(false);
+            synchronized (connector) {
+                connector.getConnection().setAutoCommit(false);
 
-            receiver.setBalance(receiver.getBalance() + amount);
-            sender.setBalance(sender.getBalance() - amount);
-            accountService.updateAccount(sender);
-            accountService.updateAccount(receiver);
+                receiver.setBalance(receiver.getBalance() + amount);
+                sender.setBalance(sender.getBalance() - amount);
+                accountService.updateAccount(sender);
+                accountService.updateAccount(receiver);
 
-            transactionId = transactionService.addTransaction(1, amount, senderId, receiverId);
+                transactionId = transactionService.addTransaction(1, amount, senderId, receiverId);
 
-            if (transactionId == 0) {
-                System.out.println("\nAn error occurred while saving transaction information\n");
+                if (transactionId == 0) {
+                    System.out.println("\nAn error occurred while saving transaction information\n");
 
-                connector.getConnection().rollback();
+                    connector.getConnection().rollback();
+                    connector.getConnection().setAutoCommit(true);
+
+                    return;
+                }
+
+                connector.getConnection().commit();
                 connector.getConnection().setAutoCommit(true);
-
-                return;
             }
-
-            connector.getConnection().commit();
-            connector.getConnection().setAutoCommit(true);
 
             transaction = transactionService.getTransaction(transactionId);
             check = checkView.getCheck(transaction.getId(), transaction.getTime().toLocalDate(),
