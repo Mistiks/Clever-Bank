@@ -2,6 +2,8 @@ package controller.service.api;
 
 import model.entity.Account;
 
+import java.sql.Date;
+
 /** An interface that can be used for CRUD operations with accounts in application */
 public interface IAccountService extends Runnable {
 
@@ -12,10 +14,11 @@ public interface IAccountService extends Runnable {
      * @param bankId id of bank
      * @param balance account balance
      * @param userId id of account owner
+     * @param date account creation date
      *
      * @return number of affected by query rows
      */
-    int addAccount(long id, long bankId, double balance, long userId);
+    int addAccount(long id, long bankId, double balance, long userId, Date date);
 
     /**
      * Reads account with specified id from database

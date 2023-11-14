@@ -8,7 +8,10 @@ import org.junit.jupiter.api.*;
 import utils.YmlFileReader;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.time.LocalDate;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -46,6 +49,9 @@ public class AccountServiceTest {
     /** Value that will be used in updating account information test */
     private final double testBalanceUpdate = 2.00;
 
+    /** Date that will be used in tests */
+    private final Date testDate = Date.valueOf(LocalDate.of(2006, 7, 24));
+
     /** Creates instance of database connection and account service before tests */
     @BeforeAll
     public static void setConnectorAndService() {
@@ -80,20 +86,21 @@ public class AccountServiceTest {
     @Test
     @Order(1)
     public void addAccountTest() {
-        assertEquals(1, accountService.addAccount(testId, testBankId, testBalance, testUserId));
+        assertEquals(1, accountService.addAccount(testId, testBankId, testBalance, testUserId, testDate));
     }
 
     /** Tests receiving information about account from the database */
     @Test
     @Order(2)
     public void getAccountTest() {
-        Account expected = new Account(testId, testBankId, testBalance, testUserId);
+        Account expected = new Account(testId, testBankId, testBalance, testUserId, testDate);
         Account actual = accountService.getAccount(testId);
 
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getBankId(), actual.getBankId());
         assertEquals(expected.getUserId(), actual.getUserId());
         assertEquals(expected.getBalance(), actual.getBalance());
+        assertEquals(expected.getCreationDate(), actual.getCreationDate());
     }
 
     /** Tests updating information about account in the database */
@@ -101,7 +108,7 @@ public class AccountServiceTest {
     @Order(3)
     public void updateAccountTest() {
         assertEquals(1, accountService.updateAccount(new Account(testId, testBankId,
-                testBalance + testBalanceUpdate, testUserId)));
+                testBalance + testBalanceUpdate, testUserId, testDate)));
         Account updated = accountService.getAccount(testId);
         assertEquals(testBalance + testBalanceUpdate, updated.getBalance());
     }
@@ -110,7 +117,7 @@ public class AccountServiceTest {
     @Test
     @Order(4)
     public void updateAllBankAccountsBalanceTest() {
-        accountService.updateAccount(new Account(testId, testBankId, testBalance, testUserId));
+        accountService.updateAccount(new Account(testId, testBankId, testBalance, testUserId, testDate));
         accountService.updateAllBankAccountsBalance("Clever-Bank");
 
         Account updated = accountService.getAccount(testId);
