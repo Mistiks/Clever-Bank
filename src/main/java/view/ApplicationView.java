@@ -7,10 +7,19 @@ public class ApplicationView {
 
     /** Array of main menu options */
     private final String[] mainMenu = {"1 - account replenishment", "2 - money withdrawal",
-            "3 - transfer to another account", "4 - exit"};
+            "3 - transfer to another account", "4 - account statement", "5 - exit"};
+
+    /** Array of time periods for account statement */
+    private final String[] intervalOptions = {"1 - month", "2 - year", "3 - entire service period"};
 
     /** String with message after main menu options */
     private final String chooseOption = "Choose option: ";
+
+    /** String with message after time interval options */
+    private final String chooseInterval = "Choose interval: ";
+
+    /** String with message before entering account id */
+    private final String accountId = "Enter account id: ";
 
     /** String with message before entering account id for replenishment */
     private final String replenishmentAccount = "Enter account id for replenishment: ";
@@ -67,6 +76,39 @@ public class ApplicationView {
     }
 
     /**
+     * Prints interval options and reads user input
+     *
+     * @param scanner Scanner object for reading input from console
+     *
+     * @return number entered by user from keyboard
+     */
+    public int chooseInterval(Scanner scanner) {
+        int option = 0;
+
+        printIntervalOptions();
+
+        while (option <= 0 || option > intervalOptions.length) {
+            try {
+                option = scanner.nextInt();
+            } catch (InputMismatchException exception) {
+                System.out.println("Please enter value between 1 and " + intervalOptions.length);
+                System.out.print(chooseInterval);
+            }
+        }
+
+        return option;
+    }
+
+    /** Prints all interval options for account statement */
+    public void printIntervalOptions() {
+        for (String option : intervalOptions) {
+            System.out.println(option);
+        }
+
+        System.out.print(chooseInterval);
+    }
+
+    /**
      * Retrieves entered account id from console
      *
      * @param scanner Scanner object for reading input from console
@@ -108,6 +150,17 @@ public class ApplicationView {
      */
     public long getReceiverId(Scanner scanner) {
         return getLong(receiverAccount, scanner);
+    }
+
+    /**
+     * Retrieves entered account id from console
+     *
+     * @param scanner Scanner object for reading input from console
+     *
+     * @return id entered by user
+     */
+    public long getAccountId(Scanner scanner) {
+        return getLong(accountId, scanner);
     }
 
     /**

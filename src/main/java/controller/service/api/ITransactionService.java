@@ -1,8 +1,10 @@
 package controller.service.api;
 
+import model.dto.StatementDto;
 import model.entity.Transaction;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * An interface that can be used for CRUD operations with transactions in application
@@ -29,6 +31,15 @@ public interface ITransactionService {
      * @return instance of Transaction class with specified id
      */
     Transaction getTransaction(long id);
+
+    /**
+     * Retrieves all transactions with specified account for transaction statement
+     *
+     * @param id account id
+     *
+     * @return list with all transactions with specified account
+     */
+    List<StatementDto> getTransactionList(long id);
 
     /**
      * Updates transaction`s info in the database

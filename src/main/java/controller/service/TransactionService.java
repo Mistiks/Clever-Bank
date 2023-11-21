@@ -1,6 +1,7 @@
 package controller.service;
 
 import controller.service.api.ITransactionService;
+import model.dto.StatementDto;
 import model.entity.Transaction;
 
 import java.sql.Connection;
@@ -8,6 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /** A class for CRUD operations with table "transaction" in database */
 public class TransactionService implements ITransactionService {
@@ -31,6 +34,16 @@ public class TransactionService implements ITransactionService {
 
     /** A query for deleting transaction from database based on id */
     private final String deleteStatement = "DELETE FROM clever_bank.transaction WHERE id = ?";
+
+    /** A query for retrieving information about all account transactions for transaction statement */
+    private final String readAllTransactionsStatement =
+            """
+            SELECT transaction.time, COALESCE(sender.name, '') AS sender, COALESCE(receiver.name, '') AS receiver, transaction.amount
+            FROM clever_bank.transaction
+            LEFT JOIN clever_bank.user AS sender on transaction.sender_id = sender.id
+            LEFT JOIN clever_bank.user AS receiver on transaction.receiver_id = receiver.id
+            WHERE sender.id = ? OR receiver.id = ?
+            """;
 
     /**
      * A constructor with parameter
@@ -120,6 +133,44 @@ public class TransactionService implements ITransactionService {
         }
 
         return transaction;
+    }
+
+    /**
+     * Retrieves all transactions with specified account for transaction statement.
+     * Prints message in case of errors
+     *
+     * @param id account id
+     *
+     * @return list with all transactions with specified account
+     */
+    @Override
+    public List<StatementDto> getTransactionList(long id) {
+        StatementDto currentStatement;
+        List<StatementDto> transactions = new ArrayList<>();
+        PreparedStatement statement;
+        ResultSet resultSet;
+
+        try {
+            statement = connection.prepareStatement(readAllTransactionsStatement);
+            statement.setLong(1, id);
+            statement.setLong(2, id);
+
+            synchronized (connection) {
+                resultSet = statement.executeQuery();
+            }
+
+            while (resultSet.next()) {
+                currentStatement = new StatementDto(resultSet.getObject("time", LocalDateTime.class),
+                        resultSet.getString("sender"), resultSet.getString("receiver"),
+                        resultSet.getDouble("amount"));
+
+                transactions.add(currentStatement);
+            }
+        } catch (SQLException e) {
+            System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+        }
+
+        return transactions;
     }
 
     /**
