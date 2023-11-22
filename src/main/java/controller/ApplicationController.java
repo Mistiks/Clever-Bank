@@ -12,7 +12,7 @@ import controller.service.api.IUserService;
 import model.dto.StatementDto;
 import model.entity.Account;
 import model.entity.Transaction;
-import utils.CheckFileWriter;
+import utils.DocumentFileWriter;
 import utils.YmlFileReader;
 import view.ApplicationView;
 import view.CheckView;
@@ -53,7 +53,7 @@ public class ApplicationController {
     private final TransactionStatementView statementView;
 
     /** Instance of CheckFileWriter for saving check to file */
-    private final CheckFileWriter checkFileWriter;
+    private final DocumentFileWriter documentFileWriter;
 
     /**
      * Constructor with parameter for controller creation
@@ -70,7 +70,7 @@ public class ApplicationController {
         bankService = new BankService(this.connector.getConnection());
         this.checkView = new CheckView(bankService);
         this.statementView = new TransactionStatementView(bankService, userService);
-        this.checkFileWriter = new CheckFileWriter();
+        this.documentFileWriter = new DocumentFileWriter();
     }
 
     /**
@@ -140,7 +140,7 @@ public class ApplicationController {
                 transaction.getTime().toLocalTime(), 0, account.getBankId(),
                 0, transaction.getReceiver(), transaction.getAmount());
 
-        checkFileWriter.saveCheck(check, transaction);
+        documentFileWriter.saveCheck(check, transaction);
         System.out.println(check);
     }
 
@@ -193,7 +193,7 @@ public class ApplicationController {
                 transaction.getTime().toLocalTime(), account.getBankId(), 0,
                 transaction.getSender(), 0, transaction.getAmount());
 
-        checkFileWriter.saveCheck(check, transaction);
+        documentFileWriter.saveCheck(check, transaction);
         System.out.println(check);
     }
 
@@ -264,7 +264,7 @@ public class ApplicationController {
                         transaction.getSender(), transaction.getReceiver(), transaction.getAmount());
             }
 
-            checkFileWriter.saveCheck(check, transaction);
+            documentFileWriter.saveCheck(check, transaction);
             System.out.println(check);
         } catch (SQLException e) {
             try {
@@ -280,7 +280,7 @@ public class ApplicationController {
 
     /** Prints account statement and saves it in file */
     private void getAccountStatement() {
-        int intervalOption = 0;
+        int intervalOption;
         Account account;
         long accountId;
         String statement;
@@ -299,6 +299,6 @@ public class ApplicationController {
         statementList = transactionService.getTransactionList(accountId);
         statement = statementView.getStatement(account, statementList, intervalOption);
 
-        System.out.println(statement);
+        documentFileWriter.saveAccountStatement(statement, account);
     }
 }
