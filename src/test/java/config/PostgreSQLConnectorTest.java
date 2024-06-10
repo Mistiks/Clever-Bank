@@ -52,14 +52,7 @@ public class PostgreSQLConnectorTest {
         connector.getConnection();
         assertEquals("SQL State: 28P01\n" +
                 "FATAL: password authentication failed for user \"postgres\"", outputStream.toString());
-<<<<<<< Updated upstream
-=======
     }
->>>>>>> Stashed changes
-
-        System.setErr(errorStream);
-    }
-
 
     /** Closes database connection */
     @AfterAll

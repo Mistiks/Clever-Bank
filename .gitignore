@@ -4,6 +4,7 @@ check/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+account-statement/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

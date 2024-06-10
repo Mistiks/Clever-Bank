@@ -16,7 +16,7 @@ public class TransactionStatementView {
     /** Instance of service for retrieving bank name from database */
     private final IBankService bankService;
 
-    /** Instance of service for retrieving bank name from database */
+    /** Instance of service for retrieving username from database */
     private final IUserService userService;
 
     /** Output formatter for dates in transaction statement */
@@ -36,8 +36,8 @@ public class TransactionStatementView {
             Период                        | %s — %s
             Дата и время формирования     | %s, %s
             Остаток                       | %s BYN
-               Дата     |         Примечание                    | Сумма
-            ------------------------------------------------------------
+               Дата    |         Примечание                       | Сумма
+            --------------------------------------------------------------
             """;
 
     /** Template for record in transaction statement */
@@ -83,7 +83,7 @@ public class TransactionStatementView {
             statement.append("\n");
         }
 
-        return statement.toString().trim();
+        return statement.toString().stripTrailing();
     }
 
     /**
