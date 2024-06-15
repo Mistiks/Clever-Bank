@@ -1,5 +1,8 @@
 package view;
 
+import model.entity.Account;
+
+import java.time.LocalDate;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -76,14 +79,17 @@ public class ApplicationView {
     }
 
     /**
-     * Prints interval options and reads user input
+     * Prints interval options and reads user input. Returns statement period start according to selected interval option
      *
      * @param scanner Scanner object for reading input from console
+     * @param account account for which transaction statement will be done
      *
-     * @return number entered by user from keyboard
+     * @return LocalDate object with interval start. Minimum value — date of account creation
      */
-    public int chooseInterval(Scanner scanner) {
+    public LocalDate getStartOfTimeInterval(Scanner scanner, Account account) {
         int option = 0;
+        LocalDate creationDate = account.getCreationDate().toLocalDate();
+        LocalDate periodStart = LocalDate.now();
 
         printIntervalOptions();
 
@@ -96,7 +102,17 @@ public class ApplicationView {
             }
         }
 
-        return option;
+        switch (option) {
+            case 1 -> periodStart = periodStart.minusMonths(1);
+            case 2 -> periodStart = periodStart.minusYears(1);
+            case 3 -> periodStart = creationDate;
+        }
+
+        if (periodStart.isBefore(creationDate)) {
+            periodStart = creationDate;
+        }
+
+        return periodStart;
     }
 
     /** Prints all interval options for account statement */

@@ -19,6 +19,7 @@ import view.CheckView;
 import view.TransactionStatementView;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
@@ -280,7 +281,7 @@ public class ApplicationController {
 
     /** Prints account statement and saves it in file */
     private void getAccountStatement() {
-        int intervalOption;
+        LocalDate intervalStart;
         Account account;
         long accountId;
         String statement;
@@ -295,10 +296,10 @@ public class ApplicationController {
             return;
         }
 
-        intervalOption = view.chooseInterval(scanner);
-        statementList = transactionService.getTransactionList(accountId);
-        statement = statementView.getStatement(account, statementList, intervalOption);
-
+        intervalStart = view.getStartOfTimeInterval(scanner, account);
+        statementList = transactionService.getTransactionListByTime(accountId, intervalStart.atStartOfDay());
+        statement = statementView.getStatement(account, statementList, intervalStart);
         documentFileWriter.saveAccountStatement(statement, account);
+        System.out.println(statement + "\n");
     }
 }

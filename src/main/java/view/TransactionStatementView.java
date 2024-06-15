@@ -55,18 +55,18 @@ public class TransactionStatementView {
      *
      * @param account account for which transaction statement will be done
      * @param statementList list of all account transaction records
-     * @param intervalOption user selected interval option for transaction statement
+     * @param intervalStart user selected interval start for transaction statement
      *
      * @return formatted string with account transaction statement
      */
-    public String getStatement(Account account, List<StatementDto> statementList, int intervalOption) {
+    public String getStatement(Account account, List<StatementDto> statementList, LocalDate intervalStart) {
         StringBuilder statement = new StringBuilder();
         String bank = bankService.getBank(account.getBankId()).getName();
         String client = userService.getUser(account.getUserId()).getName();
         LocalDateTime requestDateTime = LocalDateTime.now();
         String requestDate = dateFormatter.format(requestDateTime.toLocalDate());
         String creationDate = dateFormatter.format(account.getCreationDate().toLocalDate());
-        String periodStart = getPeriodStart(account, intervalOption, requestDateTime.toLocalDate());
+        String periodStart = dateFormatter.format(intervalStart);
         String amountStringValue = String.format("%.2f", account.getBalance());
         String operationNote;
         double recordAmount;
@@ -84,33 +84,6 @@ public class TransactionStatementView {
         }
 
         return statement.toString().stripTrailing();
-    }
-
-    /**
-     * Returns transaction statement period start according to selected interval option
-     *
-     * @param account account for which transaction statement will be done
-     * @param intervalOption user selected interval option for transaction statement
-     * @param requestDate date of transaction statement request
-     *
-     * @return String with start of period for use in transaction statement.
-     * Minimum value — date of account creation
-     */
-    private String getPeriodStart(Account account, int intervalOption, LocalDate requestDate) {
-        LocalDate creationDate = account.getCreationDate().toLocalDate();
-        LocalDate periodStart = LocalDate.now();
-
-        switch (intervalOption) {
-            case 1 -> periodStart = requestDate.minusMonths(1);
-            case 2 -> periodStart = requestDate.minusYears(1);
-            case 3 -> periodStart = creationDate;
-        }
-
-        if (periodStart.isBefore(creationDate)) {
-            periodStart = creationDate;
-        }
-
-        return dateFormatter.format(periodStart);
     }
 
     /**

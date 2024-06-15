@@ -3,6 +3,7 @@ package controller.service.api;
 import model.dto.StatementDto;
 import model.entity.Transaction;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -40,6 +41,17 @@ public interface ITransactionService {
      * @return list with all transactions with specified account
      */
     List<StatementDto> getTransactionList(long id);
+
+    /**
+     * Retrieves all transactions with specified account for transaction statement starting from specified date.
+     * Prints message in case of errors
+     *
+     * @param id account id
+     * @param intervalStart start of statement period
+     *
+     * @return list with all transactions with specified account during specified time period
+     */
+    List<StatementDto> getTransactionListByTime(long id, LocalDateTime intervalStart);
 
     /**
      * Updates transaction`s info in the database
