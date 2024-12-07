@@ -16,6 +16,9 @@ public class DocumentFileWriter {
     /** A path for creating directory for saving account transaction statements */
     private final String accountStatementPath = System.getProperty("user.dir") + File.separator + "account-statement";
 
+    /** A path for creating directory for saving account money statements */
+    private final String moneyStatementPath = System.getProperty("user.dir") + File.separator + "money-statement";
+
     /** A constructor without parameters for creating directories where files will be saved */
     public DocumentFileWriter() {
         createDirectories();
@@ -61,7 +64,7 @@ public class DocumentFileWriter {
      * @param account account for which statement was generated. Used to name a file
      */
     public void saveMoneyStatement(String accountStatement, Account account) {
-        File file = new File(accountStatementPath + File.separator + "money_statement_" + account.getId() + ".txt");
+        File file = new File(moneyStatementPath + File.separator + "money_statement_" + account.getId() + ".txt");
 
         saveFile(accountStatement, file);
     }
