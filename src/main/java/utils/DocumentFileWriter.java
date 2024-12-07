@@ -55,6 +55,18 @@ public class DocumentFileWriter {
     }
 
     /**
+     * Saves account`s money statement in file. File name depends on account id
+     *
+     * @param accountStatement data which will be saved in file
+     * @param account account for which statement was generated. Used to name a file
+     */
+    public void saveMoneyStatement(String accountStatement, Account account) {
+        File file = new File(accountStatementPath + File.separator + "money_statement_" + account.getId() + ".txt");
+
+        saveFile(accountStatement, file);
+    }
+
+    /**
      * Saves file, according to its pathname
      *
      * @param data information that will be saved in file

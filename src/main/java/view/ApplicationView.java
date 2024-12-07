@@ -10,7 +10,7 @@ public class ApplicationView {
 
     /** Array of main menu options */
     private final String[] mainMenu = {"1 - account replenishment", "2 - money withdrawal",
-            "3 - transfer to another account", "4 - account statement", "5 - exit"};
+            "3 - transfer to another account", "4 - account statement", "5 - money statement", "6 - exit"};
 
     /** Array of time periods for account statement */
     private final String[] intervalOptions = {"1 - month", "2 - year", "3 - entire service period"};

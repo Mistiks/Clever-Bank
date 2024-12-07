@@ -16,6 +16,7 @@ import utils.DocumentFileWriter;
 import utils.YmlFileReader;
 import view.ApplicationView;
 import view.CheckView;
+import view.MoneyStatementView;
 import view.TransactionStatementView;
 
 import java.sql.SQLException;
@@ -53,6 +54,9 @@ public class ApplicationController {
     /** Instance of TransactionStatementView object for creating account transaction statement */
     private final TransactionStatementView statementView;
 
+    /** Instance of MoneyStatementView object for creating account`s money statement */
+    private final MoneyStatementView moneyStatementView;
+
     /** Instance of CheckFileWriter for saving check to file */
     private final DocumentFileWriter documentFileWriter;
 
@@ -71,6 +75,7 @@ public class ApplicationController {
         bankService = new BankService(this.connector.getConnection());
         this.checkView = new CheckView(bankService);
         this.statementView = new TransactionStatementView(bankService, userService);
+        this.moneyStatementView = new MoneyStatementView(bankService, userService);
         this.documentFileWriter = new DocumentFileWriter();
     }
 
@@ -85,19 +90,19 @@ public class ApplicationController {
 
         option = view.chooseOperation(scanner);
 
-        while (option != 5) {
+        while (option != 6) {
             switch (option) {
                 case 1 -> replenishAccount();
                 case 2 -> withdrawAccount();
                 case 3 -> transferToAnotherAccount();
                 case 4 -> getAccountStatement();
+                case 5 -> getMoneyStatement();
             }
 
             option = view.chooseOperation(scanner);
         }
 
         interestCheck.interrupt();
-        scanner.close();
     }
 
     /** Replenishes user account and creates transaction record in database. Print messages in case of errors */
@@ -300,6 +305,30 @@ public class ApplicationController {
         statementList = transactionService.getTransactionListByTime(accountId, intervalStart.atStartOfDay());
         statement = statementView.getStatement(account, statementList, intervalStart);
         documentFileWriter.saveAccountStatement(statement, account);
+        System.out.println(statement + "\n");
+    }
+
+    /** Prints money statement and saves it in file */
+    private void getMoneyStatement() {
+        LocalDate intervalStart;
+        Account account;
+        long accountId;
+        String statement;
+        List<StatementDto> statementList;
+
+        accountId = view.getAccountId(scanner);
+        account = accountService.getAccount(accountId);
+
+        if (account.getId() == 0) {
+            System.out.println("\nAccount with entered id doesn't exist\n");
+
+            return;
+        }
+
+        intervalStart = view.getStartOfTimeInterval(scanner, account);
+        statementList = transactionService.getTransactionListByTime(accountId, intervalStart.atStartOfDay());
+        statement = moneyStatementView.getStatement(account, statementList, intervalStart);
+        documentFileWriter.saveMoneyStatement(statement, account);
         System.out.println(statement + "\n");
     }
 }

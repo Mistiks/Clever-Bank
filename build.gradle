@@ -46,3 +46,11 @@ jacocoTestReport {
         html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
     }
 }
+
+jar { // for Docker usage
+    manifest {
+        attributes(
+                'Main-Class': 'Main'
+        )
+    }
+}
